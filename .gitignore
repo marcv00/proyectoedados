@@ -1,0 +1,15 @@
+# Ignorar carpetas y archivos donde se guarda lo compilado
+bin/
+obj/
+
+
+*.o
+*.d
+
+# Ignorar ejecutables
+*.exe
+
+# ignorar archivos de dependencias especificas de usuario para Code::Blocks
+*.cbp.layout
+*.layout
+*.depend
