@@ -9,7 +9,7 @@ private:
     int elementosEnTabla;
 
     // Insertar evitando colisiones
-    void insertarSinColision(int hashIndex, int valueToInsert);
+    void insertarSinColision(int index, int valor);
 
 public:
     // Constructor
@@ -17,11 +17,17 @@ public:
     // Destructor
     ~HashTable();
 
-    void insertar(const std::string& key, int value);
+    // Esta metodo usara metodo privado insertarSinColision
+    void insertar(const std::string& clave, int valor);
+
+    int buscar(const std::string& dni);
+    int obtenerUsuario(const std::string& dni);
+
     void imprimir();
     bool estaLlena() const {
         return elementosEnTabla >= tamanhoTabla;
     }
+
 };
 
 #endif // HASHTABLE_H

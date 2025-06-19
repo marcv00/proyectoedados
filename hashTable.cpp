@@ -16,48 +16,85 @@ HashTable::~HashTable() {
     std::cout << "Memoria de la Tabla Hash liberada." << std::endl;
 }
 
-void HashTable::insertarSinColision(int hashIndex, int valueToInsert) {
-    int i = 0;
-    int currentIndex;
+void HashTable::insertarSinColision(int index, int valor) {
+    int i = 0, indiceActual;
 
     do {
-        currentIndex = (hashIndex + i) % tamanhoTabla;
+        indiceActual = (index + i) % tamanhoTabla;
 
-        if (hashTableArray[currentIndex] == -1) {
-            // Slot vacío, insertar aquí
-            hashTableArray[currentIndex] = valueToInsert;
+        if (hashTableArray[indiceActual] == -1) {
+            // Insertar si encuentra espacio
+            hashTableArray[indiceActual] = valor;
             elementosEnTabla++;
-            std::cout << "Valor " << valueToInsert << " insertado en indice: " << currentIndex << std::endl;
+            std::cout << "Valor " << valor << " insertado en indice: " << indiceActual << std::endl;
             break;
         } else {
             // Colisión, probar siguiente
             i++;
-            std::cout << "Colision detectada en indice inicial, probando indice: " << currentIndex + 1 << std::endl;
+            std::cout << "Colision detectada en indice inicial, probando indice: " << indiceActual + 1 << std::endl;
         }
-    } while (i < tamanhoTabla); // Asegura no salirnos del rango al probar
+    } while (i < tamanhoTabla);
 
+    // Si llega a este punto significa que ya se exploro toda la tabla
     if (i == tamanhoTabla) {
-        std::cout << "Error: No se pudo insertar el valor " << valueToInsert << ", tabla llena o error de logica." << std::endl;
+        std::cout << "Tabla Llena. No se pudo insertar el valor: " << valor << std::endl;
     }
 }
 
-void HashTable::insertar(const std::string& key, int value) {
+void HashTable::insertar(const std::string& clave, int valor) {
     if (estaLlena()) {
         std::cout << "Error: Tabla hash llena, no se puede insertar." << std::endl;
         return;
     }
 
-    int asciiSum = 0;
-    for (char c : key) {
-        asciiSum += static_cast<int>(c);
+    int sumaDeAscii = 0;
+    for (char c : clave) {
+        sumaDeAscii += (int)c;
     }
 
-    std::cout << "Clave '" << key << "' suma ASCII: " << asciiSum << std::endl;
+    std::cout << "Clave '" << clave << "' suma ASCII: " << sumaDeAscii << std::endl;
 
-    int initialIndex = asciiSum % tamanhoTabla;
-    std::cout << "Indice inicial: " << initialIndex << std::endl;
+    int index = sumaDeAscii % tamanhoTabla;
+    std::cout << "Indice inicial: " << index << std::endl;
 
-    insertarSinColision(initialIndex, value);
+    insertarSinColision(index, valor);
+}
+
+int HashTable::buscar(const std::string& dniBuscado) {
+    int sumaAscii = 0;
+    for (char c : dniBuscado) {
+        sumaAscii += static_cast<int>(c);
+    }
+
+    int index = sumaAscii % tamanhoTabla;
+    int i = 0, indiceActual;
+
+    while (i < tamanhoTabla) {
+        indiceActual = (index + i) % tamanhoTabla;
+
+        if (hashTableArray[indiceActual].dni == "") {
+            break;
+        }
+
+        if (hashTableArray[indiceActual].dni == dniBuscado) {
+            return indiceActual;
+        }
+
+        i++;
+    }
+
+    return -1;
+}
+
+int HashTable::obtenerUsuario(const std::string& dni) {
+    int indice = buscar(dni);
+
+    if (indice != -1) {
+        return hashTableArray[indice];
+    }
+
+    // Usuario "inválido"
+    return -1;
 }
 
 void HashTable::imprimir() {
