@@ -4,29 +4,32 @@
 // Al instanciarse, tamanhoTabla se define con el tamanho entregado por el usuario
 // como parametro del constructor, tambien se define elementosEnTabla a 0.
 HashTable::HashTable(int size) : tamanhoTabla(size), elementosEnTabla(0) {
-    hashTableArray = new int[tamanhoTabla];
+    hashTableArray = new Usuario*[tamanhoTabla];
     for (int i = 0; i < tamanhoTabla; ++i) {
-        hashTableArray[i] = -1; // -1 indica slot vacío
+        hashTableArray[i] = nullptr; // Se inicializara la tabla sin usuarios
     }
     std::cout << "Tabla Hash creada con tamanho: " << tamanhoTabla << std::endl;
 }
 
 HashTable::~HashTable() {
+    for (int i = 0; i < tamanhoTabla; ++i) {
+        delete hashTableArray[i];
+    }
     delete[] hashTableArray;
     std::cout << "Memoria de la Tabla Hash liberada." << std::endl;
 }
 
-void HashTable::insertarSinColision(int index, int valor) {
+void HashTable::insertarSinColision(int index, Usuario* valor) {
     int i = 0, indiceActual;
 
     do {
         indiceActual = (index + i) % tamanhoTabla;
 
-        if (hashTableArray[indiceActual] == -1) {
+        if (hashTableArray[indiceActual] == nullptr) {
             // Insertar si encuentra espacio
             hashTableArray[indiceActual] = valor;
             elementosEnTabla++;
-            std::cout << "Valor " << valor << " insertado en indice: " << indiceActual << std::endl;
+            std::cout << "Usuario con DNI " << valor->dni << " insertado en indice: " << indiceActual << std::endl;
             break;
         } else {
             // Colisión, probar siguiente
@@ -41,7 +44,7 @@ void HashTable::insertarSinColision(int index, int valor) {
     }
 }
 
-void HashTable::insertar(const std::string& clave, int valor) {
+void HashTable::insertar(const std::string& clave, Usuario* valor) {
     if (estaLlena()) {
         std::cout << "Error: Tabla hash llena, no se puede insertar." << std::endl;
         return;
@@ -63,7 +66,7 @@ void HashTable::insertar(const std::string& clave, int valor) {
 int HashTable::buscar(const std::string& dniBuscado) {
     int sumaAscii = 0;
     for (char c : dniBuscado) {
-        sumaAscii += static_cast<int>(c);
+        sumaAscii += (int)(c);
     }
 
     int index = sumaAscii % tamanhoTabla;
@@ -72,11 +75,11 @@ int HashTable::buscar(const std::string& dniBuscado) {
     while (i < tamanhoTabla) {
         indiceActual = (index + i) % tamanhoTabla;
 
-        if (hashTableArray[indiceActual].dni == "") {
-            break;
+        if (hashTableArray[indiceActual] == nullptr) {
+            continue;
         }
 
-        if (hashTableArray[indiceActual].dni == dniBuscado) {
+        if (hashTableArray[indiceActual]->dni == dniBuscado) {
             return indiceActual;
         }
 
@@ -86,21 +89,29 @@ int HashTable::buscar(const std::string& dniBuscado) {
     return -1;
 }
 
-int HashTable::obtenerUsuario(const std::string& dni) {
-    int indice = buscar(dni);
-
-    if (indice != -1) {
-        return hashTableArray[indice];
-    }
-
-    // Usuario "inválido"
-    return -1;
-}
 
 void HashTable::imprimir() {
     std::cout << "\n--- Contenido de la Tabla Hash ---\n";
     for (int i = 0; i < tamanhoTabla; ++i) {
-        std::cout << "Indice " << i << ": " << hashTableArray[i] << std::endl;
+        if (hashTableArray[i]) {
+            std::cout << "Indice " << i << ": "
+                      << hashTableArray[i]->dni << ", "
+                      << hashTableArray[i]->nombreCompleto << ", "
+                      << hashTableArray[i]->prioridad << ", "
+                      << hashTableArray[i]->zona << ", "
+                      << hashTableArray[i]->horaIngreso << std::endl;
+        } else {
+            std::cout << "Indice " << i << ": (vacio)" << std::endl;
+        }
     }
     std::cout << "----------------------------------\n";
+}
+
+void HashTable::imprimirUsuario(int i){
+    std::cout << "Usuario en indice " << i << ": "
+                      << hashTableArray[i]->dni << ", "
+                      << hashTableArray[i]->nombreCompleto << ", "
+                      << hashTableArray[i]->prioridad << ", "
+                      << hashTableArray[i]->zona << ", "
+                      << hashTableArray[i]->horaIngreso << std::endl;
 }

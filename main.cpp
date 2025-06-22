@@ -1,43 +1,45 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
-#include <limits>
 #include "HashTable.h"
 
 int main() {
-    char band;
-    int tamanhoTabla;
-    int valor;
+    HashTable tablaUsuarios(5000); // inicializamos la tabla con 5000 espacios
 
-    std::cout << "Ingrese el tamaño de la tabla hash: ";
-    std::cin >> tamanhoTabla;
+    std::ifstream archivo("data/usuarios.txt"); // abrimos el archivo txt
+    std::string linea;
+    int contador = 0;
 
-    // Creamos un objeto de nuestra clase HashTable
-    HashTable myHashTable(tamanhoTabla);
+    while (std::getline(archivo, linea) && contador < 5) { // solo leemos las primeras 5 lineas
+        std::stringstream ss(linea);
+        std::string dni, nombre, prioridad, zonaStr, hora;
+        std::getline(ss, dni, ',');
+        std::getline(ss, nombre, ',');
+        std::getline(ss, prioridad, ',');
+        std::getline(ss, zonaStr, ',');
+        std::getline(ss, hora, ',');
 
-    do {
-        // Limpiamos el buffer de entrada antes de leer el string
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        Usuario* user = new Usuario;
+        user->dni = dni;
+        user->nombreCompleto = nombre;
+        user->prioridad = prioridad;
+        user->zona = zonaStr[0];
+        user->horaIngreso = hora;
 
-        // Pedir clave
-        std::string clave;
-        std::cout << "Ingrese la clave: ";
-        std::getline(std::cin, clave);
+        tablaUsuarios.insertar(user->dni, user);
+        contador++;
+    }
 
-        // Pedir valor
-        std::cout << "Ingrese el valor: ";
-        std::cin >> valor;
+    std::string dniABuscar = "78804794"; // uno de los primeros dnis en el archivo
+    int indice = tablaUsuarios.buscar(dniABuscar);
 
-        // Insertamos en nuestra tabla hash
-        myHashTable.insertar(clave, valor);
+    if (indice != -1) {
+        std::cout << "Dni encontrado!" << std::endl;
+        tablaUsuarios.imprimirUsuario(indice);
+    } else {
+        std::cout << "Usuario con DNI " << dniABuscar << " no encontrado." << std::endl;
+    }
 
-        // Mostramos la tabla
-        myHashTable.imprimir();
-
-        std::cout << "¿Desea ingresar otra clave (s/n)? ";
-        std::cin >> band;
-
-    } while (band == 's' && !myHashTable.estaLlena());
-
-    // Cuando main termine, el destructor de Tabla hash se dispara automaticamente
     return 0;
 }
