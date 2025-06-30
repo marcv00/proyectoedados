@@ -28,7 +28,6 @@ private:
     Nodo* rotarDerecha(Nodo* nodo);
     void mostrarEchado(Nodo* nodo, int nivel);
 
-    // Función que compara las zonas en el orden deseado (VIP > Preferencial > Tribuna > General)
     int compararZonas(const string& zona1, const string& zona2) {
         if (zona1 == "VIP" && zona2 != "VIP") return -1;
         if (zona1 == "Preferencial" && (zona2 == "Tribuna" || zona2 == "General")) return -1;
@@ -44,22 +43,18 @@ public:
     void mostrar();
 };
 
-// Función para insertar un nuevo nodo en el árbol
 void ArbolAVL::insertar(string id, string zona, int hora) {
     raiz = insertarRecursivo(raiz, id, zona, hora);
 }
 
-// Inserción recursiva en el árbol AVL, comparando hora y zona
 Nodo* ArbolAVL::insertarRecursivo(Nodo* nodo, string id, string zona, int hora) {
     if (!nodo) {
         return new Nodo(id, zona, hora);
     }
 
-    // Crear la clave combinada: primero hora y luego zona
     string claveNueva = to_string(hora) + zona;  // Ejemplo: "10VIP"
     string claveActual = to_string(nodo->horaIngreso) + nodo->zonaAcceso;
 
-    // Comparar las claves combinadas
     if (claveNueva < claveActual) {
         nodo->izq = insertarRecursivo(nodo->izq, id, zona, hora);
         nodo->izq->padre = nodo;
@@ -67,7 +62,6 @@ Nodo* ArbolAVL::insertarRecursivo(Nodo* nodo, string id, string zona, int hora) 
         nodo->der = insertarRecursivo(nodo->der, id, zona, hora);
         nodo->der->padre = nodo;
     } else {
-        // Si la clave combinada es la misma, comparar por zona utilizando la función personalizada
         if (compararZonas(zona, nodo->zonaAcceso) < 0) {
             nodo->izq = insertarRecursivo(nodo->izq, id, zona, hora);
             nodo->izq->padre = nodo;
@@ -77,23 +71,19 @@ Nodo* ArbolAVL::insertarRecursivo(Nodo* nodo, string id, string zona, int hora) 
         }
     }
 
-    // Actualizar el factor de balance y rebalancear el árbol si es necesario
     actualizarFactor(nodo);
     return rebalance(nodo);
 }
 
-// Calcular la altura de un nodo
 int ArbolAVL::calcularAltura(Nodo* nodo) {
     if (!nodo) return 0;
     return 1 + max(calcularAltura(nodo->izq), calcularAltura(nodo->der));
 }
 
-// Actualizar el factor de balance de un nodo
 void ArbolAVL::actualizarFactor(Nodo* nodo) {
     nodo->factor_balance = calcularAltura(nodo->izq) - calcularAltura(nodo->der);
 }
 
-// Rebalancear el árbol si es necesario
 Nodo* ArbolAVL::rebalance(Nodo* nodo) {
     actualizarFactor(nodo);
     if (nodo->factor_balance > 1) {
@@ -113,7 +103,6 @@ Nodo* ArbolAVL::rebalance(Nodo* nodo) {
     return nodo;
 }
 
-// Rotar el árbol hacia la izquierda
 Nodo* ArbolAVL::rotarIzquierda(Nodo* nodo) {
     Nodo* nuevaRaiz = nodo->der;
     nodo->der = nuevaRaiz->izq;
@@ -129,7 +118,6 @@ Nodo* ArbolAVL::rotarIzquierda(Nodo* nodo) {
     return nuevaRaiz;
 }
 
-// Rotar el árbol hacia la derecha
 Nodo* ArbolAVL::rotarDerecha(Nodo* nodo) {
     Nodo* nuevaRaiz = nodo->izq;
     nodo->izq = nuevaRaiz->der;
@@ -167,7 +155,6 @@ void ArbolAVL::mostrarEchado(Nodo* nodo, int nivel) {
 int main() {
     ArbolAVL arbol;
 
-    // Insertando nodos en el árbol
     arbol.insertar("A123", "VIP", 10);
     arbol.insertar("B456", "Preferencial", 10);
     arbol.insertar("C789", "Tribuna", 10);
@@ -175,7 +162,6 @@ int main() {
     arbol.insertar("E345", "VIP", 11);
     arbol.insertar("F678", "General", 12);
 
-    // Mostramos el árbol
     cout << "Árbol AVL (Visualizado):" << endl;
     arbol.mostrar();
 
