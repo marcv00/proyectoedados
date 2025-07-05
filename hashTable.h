@@ -1,23 +1,19 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 #include <string>
-
-struct Usuario {
-    std::string dni;
-    std::string nombreCompleto;
-    std::string prioridad;
-    char zona;
-    std::string horaIngreso;
-};
+#include "Usuario.h"
 
 class HashTable {
 private:
     Usuario** hashTableArray;
     int tamanhoTabla;
     int elementosEnTabla;
+    float umbralRehash = 0.7f;
 
     // Insertar evitando colisiones
     void insertarSinColision(int index, Usuario* valor);
+
+    void rehash();
 
 public:
     // Constructor

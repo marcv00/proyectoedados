@@ -34,7 +34,7 @@ void HashTable::insertarSinColision(int index, Usuario* valor) {
         } else {
             // Colisión, probar siguiente
             i++;
-            std::cout << "Colision detectada en indice inicial, probando indice: " << indiceActual + 1 << std::endl;
+            //std::cout << "Colision detectada en indice inicial, probando indice: " << indiceActual + 1 << std::endl;
         }
     } while (i < tamanhoTabla);
 
@@ -48,6 +48,18 @@ void HashTable::insertar(const std::string& clave, Usuario* valor) {
     if (estaLlena()) {
         std::cout << "Error: Tabla hash llena, no se puede insertar." << std::endl;
         return;
+    }
+
+    if (buscar(clave) != -1) {
+        std::cout << "DNI duplicado (" << clave << "), no se insertara." << std::endl;
+        delete valor;
+        return;
+    }
+
+    float porcentajeEnTabla = (float)elementosEnTabla / tamanhoTabla;
+    if (porcentajeEnTabla >= umbralRehash) {
+        std::cout << "Se lleno la tabla hasta el " << umbralRehash*100 << "%, se duplicara el tamanho de la tabla.\n";
+        rehash();
     }
 
     int sumaDeAscii = 0;
@@ -76,7 +88,7 @@ int HashTable::buscar(const std::string& dniBuscado) {
         indiceActual = (index + i) % tamanhoTabla;
 
         if (hashTableArray[indiceActual] == nullptr) {
-            continue;
+            return -1;
         }
 
         if (hashTableArray[indiceActual]->dni == dniBuscado) {
@@ -87,6 +99,41 @@ int HashTable::buscar(const std::string& dniBuscado) {
     }
 
     return -1;
+}
+
+void HashTable::rehash() {
+    int nuevoTamanho = tamanhoTabla * 2;
+    Usuario** nuevaTabla = new Usuario*[nuevoTamanho];
+    for (int i = 0; i < nuevoTamanho; ++i) {
+        nuevaTabla[i] = nullptr;
+    }
+
+    for (int i = 0; i < tamanhoTabla; ++i) {
+        if (hashTableArray[i]) {
+            // Recalcular la nueva posición del elemento
+            Usuario* usuarioOriginal = hashTableArray[i];
+            int nuevaSuma = 0;
+            for (char c : usuarioOriginal->dni) {
+                nuevaSuma += (int)c;
+            }
+
+            int nuevoIndice = nuevaSuma % nuevoTamanho;
+            int j = 0, posFinal;
+            while (true) {
+                posFinal = (nuevoIndice + j) % nuevoTamanho;
+                if (nuevaTabla[posFinal] == nullptr) {
+                    nuevaTabla[posFinal] = usuarioOriginal;
+                    break;
+                }
+                j++;
+            }
+        }
+    }
+
+    delete[] hashTableArray; // Liberar memoria de la nueva tabla
+    hashTableArray = nuevaTabla; // Hacer que la tabla vieja apunte a la nueva
+    tamanhoTabla = nuevoTamanho; // Actualizar el tamanho
+    std::cout << "Rehashing completado. Nuevo tamanho de tabla: " << tamanhoTabla << std::endl;
 }
 
 
@@ -108,10 +155,14 @@ void HashTable::imprimir() {
 }
 
 void HashTable::imprimirUsuario(int i){
-    std::cout << "Usuario en indice " << i << ": "
-                      << hashTableArray[i]->dni << ", "
-                      << hashTableArray[i]->nombreCompleto << ", "
-                      << hashTableArray[i]->prioridad << ", "
-                      << hashTableArray[i]->zona << ", "
-                      << hashTableArray[i]->horaIngreso << std::endl;
+    if (i >= 0 && i < tamanhoTabla && hashTableArray[i]) {
+        std::cout << "Usuario en indice " << i << ": "
+                  << hashTableArray[i]->dni << ", "
+                  << hashTableArray[i]->nombreCompleto << ", "
+                  << hashTableArray[i]->prioridad << ", "
+                  << hashTableArray[i]->zona << ", "
+                  << hashTableArray[i]->horaIngreso << std::endl;
+    } else {
+        std::cout << "No se encontro usuario en ese indice o el indice es invalido." << std::endl;
+    }
 }

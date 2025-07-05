@@ -32,8 +32,15 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="hashTable.cpp" />
-		<Unit filename="hashTable.h" />
+		<Unit filename="ArbolAVL.cpp" />
+		<Unit filename="ArbolAVL.h" />
+		<Unit filename="ArbolRojoNegro.cpp" />
+		<Unit filename="ArbolRojoNegro.h" />
+		<Unit filename="HashTable.cpp" />
+		<Unit filename="HashTable.h" />
+		<Unit filename="Heap.cpp" />
+		<Unit filename="Heap.h" />
+		<Unit filename="Usuario.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
