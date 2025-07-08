@@ -4,12 +4,12 @@
 
 // Constructor
 ArbolRojoNegro::ArbolRojoNegro() {
-    TNULL = new NodoRN(Acceso("", 0, 0)); // Crear un nodo nulo/sentinel
+    TNULL = new NodoRN(Acceso("", 0, 0)); // Crear un nodo nulo/
     TNULL->color = NEGRO;
     TNULL->izquierdo = nullptr;
     TNULL->derecho = nullptr;
-    TNULL->padre = nullptr; // Opcional, pero buena práctica si el sentinel puede ser padre
-    raiz = TNULL; // Inicialmente la raíz es el nodo nulo
+    TNULL->padre = nullptr; 
+    raiz = TNULL; // Inicialmente la raÃ­z es el nodo nulo
 }
 
 // Destructor
@@ -18,7 +18,7 @@ ArbolRojoNegro::~ArbolRojoNegro() {
     delete TNULL; // Liberar el nodo TNULL
 }
 
-// Función auxiliar para liberar memoria recursivamente
+// FunciÃ³n auxiliar para liberar memoria recursivamente
 void ArbolRojoNegro::liberarNodos(NodoRN* nodo) {
     if (nodo != TNULL) { // Asegurarse de no eliminar TNULL recursivamente
         liberarNodos(nodo->izquierdo);
@@ -27,7 +27,7 @@ void ArbolRojoNegro::liberarNodos(NodoRN* nodo) {
     }
 }
 
-// Función auxiliar de reemplazo para rotaciones y eliminación
+// FunciÃ³n auxiliar de reemplazo para rotaciones y eliminaciÃ³n
 void ArbolRojoNegro::transplant(NodoRN* u, NodoRN* v) {
     if (u->padre == nullptr) {
         raiz = v;
@@ -39,7 +39,7 @@ void ArbolRojoNegro::transplant(NodoRN* u, NodoRN* v) {
     v->padre = u->padre;
 }
 
-// Función para encontrar el nodo con el valor mínimo en un subárbol
+// FunciÃ³n para encontrar el nodo con el valor mÃ­nimo en un subÃ¡rbol
 NodoRN* ArbolRojoNegro::minimo(NodoRN* nodo) {
     while (nodo->izquierdo != TNULL) {
         nodo = nodo->izquierdo;
@@ -53,7 +53,7 @@ void ArbolRojoNegro::insertar(const Acceso& acceso) {
     nuevo->derecho = TNULL;   // Idem
 
     NodoRN* y = nullptr;
-    NodoRN* x = this->raiz; // Usar 'this->raiz' para evitar ambigüedad
+    NodoRN* x = this->raiz; // Usar 'this->raiz' para evitar ambigÃ¼edad
 
     while (x != TNULL) { // Comparar con TNULL
         y = x;
@@ -92,11 +92,103 @@ void ArbolRojoNegro::insertar(const Acceso& acceso) {
     insertarFixup(nuevo);
 }
 
-// Implementación simplificada del fixup según tu descripción
+
 void ArbolRojoNegro::insertarFixup(NodoRN* z) {
+    while (z->padre->color == ROJO) {
+        if (z->padre == z->padre->padre->izquierdo) {
+            NodoRN* y = z->padre->padre->derecho; // TÃ­o de z
+            if (y->color == ROJO) { // Caso 1: El tÃ­o es rojo
+                z->padre->color = NEGRO;
+                y->color = NEGRO;
+                z->padre->padre->color = ROJO;
+                z = z->padre->padre;
+            } else {
+                if (z == z->padre->derecho) { // Caso 2: z es hijo derecho
+                    z = z->padre;
+                    rotarIzquierda(z);
+                }
+                // Caso 3: z es hijo izquierdo
+                z->padre->color = NEGRO;
+                z->padre->padre->color = ROJO;
+                rotarDerecha(z->padre->padre);
+            }
+        } else {
+            NodoRN* y = z->padre->padre->izquierdo; // TÃ­o de z
+            if (y->color == ROJO) { // Caso 1: El tÃ­o es rojo
+                z->padre->color = NEGRO;
+                y->color = NEGRO;
+                z->padre->padre->color = ROJO;
+                z = z->padre->padre;
+            } else {
+                if (z == z->padre->izquierdo) { // Caso 2: z es hijo izquierdo
+                    z = z->padre;
+                    rotarDerecha(z);
+                }
+                // Caso 3: z es hijo derecho
+                z->padre->color = NEGRO;
+                z->padre->padre->color = ROJO;
+                rotarIzquierda(z->padre->padre);
+            }
+        }
+    }
     raiz->color = NEGRO;
 }
-
+void ArbolRojoNegro::eliminarFixup(NodoRN* x) {
+    while (x != raiz && x->color == NEGRO) {
+        if (x == x->padre->izquierdo) {
+            NodoRN* w = x->padre->derecho;
+            if (w->color == ROJO) { // Caso 1: El hermano es rojo
+                w->color = NEGRO;
+                x->padre->color = ROJO;
+                rotarIzquierda(x->padre);
+                w = x->padre->derecho;
+            }
+            if (w->izquierdo->color == NEGRO && w->derecho->color == NEGRO) { // Caso 2: Ambos hijos del hermano son negros
+                w->color = ROJO;
+                x = x->padre;
+            } else {
+                if (w->derecho->color == NEGRO) { // Caso 3: El hijo derecho del hermano es negro
+                    w->izquierdo->color = NEGRO;
+                    w->color = ROJO;
+                    rotarDerecha(w);
+                    w = x->padre->derecho;
+                }
+                // Caso 4: El hijo derecho del hermano es rojo
+                w->color = x->padre->color;
+                x->padre->color = NEGRO;
+                w->derecho->color = NEGRO;
+                rotarIzquierda(x->padre);
+                x = raiz;
+            }
+        } else {
+            NodoRN* w = x->padre->izquierdo;
+            if (w->color == ROJO) { // Caso 1: El hermano es rojo
+                w->color = NEGRO;
+                x->padre->color = ROJO;
+                rotarDerecha(x->padre);
+                w = x->padre->izquierdo;
+            }
+            if (w->derecho->color == NEGRO && w->izquierdo->color == NEGRO) { // Caso 2: Ambos hijos del hermano son negros
+                w->color = ROJO;
+                x = x->padre;
+            } else {
+                if (w->izquierdo->color == NEGRO) { // Caso 3: El hijo izquierdo del hermano es negro
+                    w->derecho->color = NEGRO;
+                    w->color = ROJO;
+                    rotarIzquierda(w);
+                    w = x->padre->izquierdo;
+                }
+                // Caso 4: El hijo izquierdo del hermano es rojo
+                w->color = x->padre->color;
+                x->padre->color = NEGRO;
+                w->izquierdo->color = NEGRO;
+                rotarDerecha(x->padre);
+                x = raiz;
+            }
+        }
+    }
+    x->color = NEGRO;
+}
 
 void ArbolRojoNegro::rotarIzquierda(NodoRN* x) {
     NodoRN* y = x->derecho;
@@ -135,7 +227,7 @@ void ArbolRojoNegro::rotarDerecha(NodoRN* x) {
 }
 
 
-// Función para contar zonas de forma recursiva
+// FunciÃ³n para contar zonas de forma recursiva
 void ArbolRojoNegro::contarZonas(NodoRN* nodo, ZonaContador* zonas, int& numZonas, int maxZonas) const {
     if (nodo == TNULL) return;
     contarZonas(nodo->izquierdo, zonas, numZonas, maxZonas);
@@ -158,14 +250,14 @@ void ArbolRojoNegro::contarZonas(NodoRN* nodo, ZonaContador* zonas, int& numZona
 }
 
 void ArbolRojoNegro::zonaConMasEntradas(char* zona_resultado, int tam) const {
-    const int MAX_ZONAS = 100; // Asumiendo un número máximo de zonas posibles
+    const int MAX_ZONAS = 100; // Asumiendo un nÃºmero mÃ¡ximo de zonas posibles
     ZonaContador zonas[MAX_ZONAS];
     int numZonas = 0;
-    zona_resultado[0] = '\0'; // Asegurar que esté vacío inicialmente
+    zona_resultado[0] = '\0'; // Asegurar que estÃ© vacÃ­o inicialmente
 
     contarZonas(raiz, zonas, numZonas, MAX_ZONAS);
 
-    int max_cantidad = -1; // Usar -1 para asegurar que cualquier cantidad válida sea mayor
+    int max_cantidad = -1; // Usar -1 para asegurar que cualquier cantidad vÃ¡lida sea mayor
     if (numZonas == 0) {
         strncpy(zona_resultado, "No hay accesos registrados.", tam - 1);
         zona_resultado[tam-1] = '\0';
@@ -184,17 +276,17 @@ void ArbolRojoNegro::zonaConMasEntradas(char* zona_resultado, int tam) const {
 void ArbolRojoNegro::consultarFranja(NodoRN* nodo, int inicio, int fin, Acceso* resultado, int& num, int max_resultados) const {
     if (nodo == TNULL || num >= max_resultados) return;
 
-    // Recorre el subárbol izquierdo si es relevante
+    // Recorre el subÃ¡rbol izquierdo si es relevante
     if (nodo->acceso.hora >= inicio) { // Potencialmente hay nodos relevantes a la izquierda
         consultarFranja(nodo->izquierdo, inicio, fin, resultado, num, max_resultados);
     }
 
-    // Procesa el nodo actual si está dentro de la franja horaria
+    // Procesa el nodo actual si estÃ¡ dentro de la franja horaria
     if (nodo->acceso.hora >= inicio && nodo->acceso.hora <= fin && num < max_resultados) {
         resultado[num++] = nodo->acceso;
     }
 
-    // Recorre el subárbol derecho si es relevante
+    // Recorre el subÃ¡rbol derecho si es relevante
     if (nodo->acceso.hora <= fin) { // Potencialmente hay nodos relevantes a la derecha
         consultarFranja(nodo->derecho, inicio, fin, resultado, num, max_resultados);
     }
@@ -206,7 +298,7 @@ int ArbolRojoNegro::consultarPorFranja(int inicio, int fin, Acceso* resultado, i
     return num;
 }
 
-// Función de demostración para mostrar el árbol (in-order traversal)
+// FunciÃ³n de demostraciÃ³n para mostrar el Ã¡rbol (in-order traversal)
 void ArbolRojoNegro::mostrarInOrden(NodoRN* nodo) const {
     if (nodo != TNULL) {
         mostrarInOrden(nodo->izquierdo);
@@ -227,7 +319,7 @@ void ArbolRojoNegro::mostrar() {
     std::cout << "--------------------------------------------------\n";
 }
 
-// Implementación placeholder para buscar y eliminar (si es necesario)
+// ImplementaciÃ³n  para buscar 
 NodoRN* ArbolRojoNegro::buscar(const Acceso& acceso) const {
     NodoRN* current = raiz;
     while (current != TNULL) {
@@ -250,5 +342,42 @@ NodoRN* ArbolRojoNegro::buscar(const Acceso& acceso) const {
 }
 
 void ArbolRojoNegro::eliminar(const Acceso& acceso) {
-    std::cout << "La funcion de eliminacion para el Arbol Rojo-Negro no esta completamente implementada." << std::endl;
+    NodoRN* z = buscar(acceso);
+    if (z == TNULL) {
+        std::cout << "El nodo a eliminar no se encuentra en el Ã¡rbol." << std::endl;
+        return;
+    }
+
+    NodoRN* y = z;
+    NodoRN* x;
+    int yColorOriginal = y->color;
+
+    if (z->izquierdo == TNULL) {
+        x = z->derecho;
+        transplant(z, z->derecho);
+    } else if (z->derecho == TNULL) {
+        x = z->izquierdo;
+        transplant(z, z->izquierdo);
+    } else {
+        y = minimo(z->derecho);
+        yColorOriginal = y->color;
+        x = y->derecho;
+        if (y->padre == z) {
+            x->padre = y;
+        } else {
+            transplant(y, y->derecho);
+            y->derecho = z->derecho;
+            y->derecho->padre = y;
+        }
+        transplant(z, y);
+        y->izquierdo = z->izquierdo;
+        y->izquierdo->padre = y;
+        y->color = z->color;
+    }
+
+    delete z;
+
+    if (yColorOriginal == NEGRO) {
+        eliminarFixup(x);
+    }
 }
