@@ -29,7 +29,8 @@ void HashTable::insertarSinColision(int index, Usuario* valor) {
             // Insertar si encuentra espacio
             hashTableArray[indiceActual] = valor;
             elementosEnTabla++;
-            std::cout << "Usuario con DNI " << valor->dni << " insertado en indice: " << indiceActual << std::endl;
+            // Comentar lo siguiente para motivos de simulacion de sistema:
+            //std::cout << "Usuario con DNI " << valor->dni << " insertado en indice: " << indiceActual << std::endl;
             break;
         } else {
             // Colisión, probar siguiente
@@ -67,10 +68,11 @@ void HashTable::insertar(const std::string& clave, Usuario* valor) {
         sumaDeAscii += (int)c;
     }
 
-    std::cout << "Clave '" << clave << "' suma ASCII: " << sumaDeAscii << std::endl;
+    // Comentar para simulacion de sistema
+    //std::cout << "Clave '" << clave << "' suma ASCII: " << sumaDeAscii << std::endl;
 
     int index = sumaDeAscii % tamanhoTabla;
-    std::cout << "Indice inicial: " << index << std::endl;
+    //std::cout << "Indice inicial: " << index << std::endl;
 
     insertarSinColision(index, valor);
 }
